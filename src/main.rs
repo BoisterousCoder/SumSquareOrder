@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![allow(unused_must_use)]
 use std::thread;
 use std::env;
 use std::sync::mpsc::SyncSender;
@@ -117,6 +118,7 @@ fn doThread(connections:Vec<[i16; 2]>, path:&mut Vec<i16>, totalNodes:i16) -> Ve
         let mut goTo:i16 = 0;
         let mut isFirstConnection:bool = true;
         for connection in connections.clone() {
+            #[allow(unused_assignments)]
             let mut connectedTo:i16 = 0;
             if node == connection[0] {
                 connectedTo = connection[1];
