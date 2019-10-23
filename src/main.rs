@@ -29,7 +29,7 @@ fn main(){
     println!("You have chosen to order numbers upto {}", _totalNodes);
     println!("You have chosen to hava a max number of threads of {}", _maxThreads);
     let totalNodes:i16 = _totalNodes.parse::<i16>().unwrap();
-    let maxThreads:i8 = _maxThreads.parse::<i8>().unwrap();
+    let maxThreads:i16 = _maxThreads.parse::<i16>().unwrap();
     let now = Instant::now();
 
     let paths = getCore(totalNodes, maxThreads, now);
@@ -39,7 +39,7 @@ fn main(){
     println!("It took aproximately {} seconds to compute", endTime);
 }
 
-fn getCore(totalNodes:i16, maxThreads:i8, now:Instant) -> Vec<Vec<i16>>{
+fn getCore(totalNodes:i16, maxThreads:i16, now:Instant) -> Vec<Vec<i16>>{
     let connections:Vec<[i16; 2]> = findConnections(totalNodes);
     let (sender, reciever) = sync_channel(maxThreads as usize);
     let mut paths:Vec<Vec<i16>> = vec![];
@@ -47,9 +47,9 @@ fn getCore(totalNodes:i16, maxThreads:i8, now:Instant) -> Vec<Vec<i16>>{
     println!("There are {} connections", connections.len());
     
     let mut i:i16 = 0;
-    let mut openThreads = 0;
+    let mut openThreads:i16 = 0;
     loop{
-        while (openThreads < maxThreads as usize) && (i < totalNodes){
+        while (openThreads < maxThreads) && (i < totalNodes){
             startCalcAsync(i, connections.clone(), totalNodes.clone(), sender.clone());
             openThreads += 1;
             i += 1;
@@ -61,7 +61,7 @@ fn getCore(totalNodes:i16, maxThreads:i8, now:Instant) -> Vec<Vec<i16>>{
         
         println!("finnished task {} of {} at {} seconds", completedTask.startNode, totalNodes, now.elapsed().as_secs());
 
-        if openThreads == 0 {
+        if openThreads < 1 {
             break;
         }
     }
@@ -173,6 +173,16 @@ fn findConnections(totalNodes:i16) -> Vec<[i16; 2]> {
 }
 
 fn isSquare(num:i16) -> bool{
-    let sqrt:f64 = (num as f64).sqrt();
-    return sqrt == sqrt.round();
+    let mut i:i16 = 2;
+    loop {
+        if i*i > num {
+            return false;
+        }
+        else if i*i == num {
+            return true;
+        }
+        else{
+            i += 1;
+        }
+    };
 }
