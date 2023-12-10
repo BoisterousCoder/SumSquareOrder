@@ -10,8 +10,8 @@ use std::time::Instant;
 
 
 struct CompleteTask{
-    startNode: u16,
-    paths: Vec<Vec<u16>>,
+    startNode: u8,
+    paths: Vec<Vec<u8>>,
 }
 
 fn main(){
@@ -28,8 +28,8 @@ fn main(){
     }
     println!("You have chosen to order numbers upto {}", _totalNodes);
     println!("You have chosen to have a a max number of threads of {}", _maxThreads);
-    let totalNodes:u16 = _totalNodes.parse::<u16>().unwrap();
-    let maxThreads:u16 = _maxThreads.parse::<u16>().unwrap();
+    let totalNodes:u8 = _totalNodes.parse::<u8>().unwrap();
+    let maxThreads:u8 = _maxThreads.parse::<u8>().unwrap();
     let now = Instant::now();
 
     let paths = getCore(totalNodes, maxThreads, now);
@@ -39,15 +39,15 @@ fn main(){
     println!("It took aproximately {} seconds to compute", endTime);
 }
 
-fn getCore(totalNodes:u16, maxThreads:u16, now:Instant) -> Vec<Vec<u16>>{
-    let connections:Vec<[u16; 2]> = findConnections(totalNodes);
+fn getCore(totalNodes:u8, maxThreads:u8, now:Instant) -> Vec<Vec<u8>>{
+    let connections:Vec<[u8; 2]> = findConnections(totalNodes);
     let (sender, reciever) = sync_channel(maxThreads as usize);
-    let mut paths:Vec<Vec<u16>> = vec![];
+    let mut paths:Vec<Vec<u8>> = vec![];
 
     println!("There are {} connections", connections.len());
     
-    let mut i:u16 = 0;
-    let mut openThreads:u16 = 0;
+    let mut i:u8 = 0;
+    let mut openThreads:u8 = 0;
     loop{
         while (openThreads < maxThreads) && (i < totalNodes){
             startCalcAsync(i, connections.clone(), totalNodes.clone(), sender.clone());
@@ -68,10 +68,10 @@ fn getCore(totalNodes:u16, maxThreads:u16, now:Instant) -> Vec<Vec<u16>>{
     return paths;
 }
 
-fn startCalcAsync(startNode:u16, connections:Vec<[u16; 2]>, totalNodes:u16, sender:SyncSender<CompleteTask>){
+fn startCalcAsync(startNode:u8, connections:Vec<[u8; 2]>, totalNodes:u8, sender:SyncSender<CompleteTask>){
     println!("Starting task {}", startNode);
 
-    let mut path:Vec<u16> = Vec::with_capacity(totalNodes as usize);
+    let mut path:Vec<u8> = Vec::with_capacity(totalNodes as usize);
     path.push(startNode);
 
     thread::spawn(move || {
@@ -82,7 +82,7 @@ fn startCalcAsync(startNode:u16, connections:Vec<[u16; 2]>, totalNodes:u16, send
         }).unwrap();
     });
 }
-fn printResult(paths:Vec<Vec<u16>>, totalNodes:u16){
+fn printResult(paths:Vec<Vec<u8>>, totalNodes:u8){
     println!("Exporting final data...");
     let result = File::create("Output.txt");
     let length = paths.len();
@@ -111,16 +111,16 @@ fn printResult(paths:Vec<Vec<u16>>, totalNodes:u16){
     println!("All working paths have been outputted to Output.txt");
 }
 
-fn doThread(connections:Vec<[u16; 2]>, path:&mut Vec<u16>, totalNodes:u16) -> Vec<Vec<u16>>{
-    let mut paths:Vec<Vec<u16>> = Vec::with_capacity(totalNodes as usize);
+fn doThread(connections:Vec<[u8; 2]>, path:&mut Vec<u8>, totalNodes:u8) -> Vec<Vec<u8>>{
+    let mut paths:Vec<Vec<u8>> = Vec::with_capacity(totalNodes as usize);
     
     loop{
         let node = path[path.len()-1];
-        let mut goTo:u16 = 0;
+        let mut goTo:u8 = 0;
         let mut isFirstConnection:bool = true;
         for connection in connections.clone() {
             #[allow(unused_assignments)]
-            let mut connectedTo:u16 = 0;
+            let mut connectedTo:u8 = 0;
             if node == connection[0] {
                 connectedTo = connection[1];
             }else if node == connection[1] {
@@ -152,7 +152,7 @@ fn doThread(connections:Vec<[u16; 2]>, path:&mut Vec<u16>, totalNodes:u16) -> Ve
     return paths;
 }
 
-fn isNodeInPath(node:u16, path:Vec<u16>)->bool{
+fn isNodeInPath(node:u8, path:Vec<u8>)->bool{
     for nodeToCheck in path {
         if nodeToCheck == node {
             return true;
@@ -161,11 +161,11 @@ fn isNodeInPath(node:u16, path:Vec<u16>)->bool{
     return false;
 }
 
-fn findConnections(totalNodes:u16) -> Vec<[u16; 2]> {
-    let mut connections:Vec<[u16; 2]> = vec![];
+fn findConnections(totalNodes:u8) -> Vec<[u8; 2]> {
+    let mut connections:Vec<[u8; 2]> = vec![];
     for i in 1..totalNodes {
         for j in i+1..totalNodes+1 {
-            if isSquare(i+j) {
+            if isSquare(i as u16+j as u16) {
                 connections.push([i, j]);
             }
         }
